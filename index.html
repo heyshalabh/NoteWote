@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoteWote — Simple Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-note-sticky"></i></span>
+          <span class="logo-text">NoteWote</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-filter="all">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>All Notes</span>
+          <span class="nav-count" id="countAll">0</span>
+        </button>
+        <button class="nav-item" data-filter="pinned">
+          <i class="fa-solid fa-thumbtack"></i>
+          <span>Pinned</span>
+          <span class="nav-count" id="countPinned">0</span>
+        </button>
+        <button class="nav-item" data-filter="favourites">
+          <i class="fa-solid fa-star"></i>
+          <span>Favourites</span>
+          <span class="nav-count" id="countFavourites">0</span>
+        </button>
+        <button class="nav-item" data-filter="archive">
+          <i class="fa-solid fa-box-archive"></i>
+          <span>Archive</span>
+          <span class="nav-count" id="countArchive">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-section">
+        <div class="section-label">Tags</div>
+        <div class="tags-list" id="tagsList">
+          <!-- Tags populated by JS -->
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+          <span id="themeLabel">Dark mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search notes..."
+            autocomplete="off"
+          />
+          <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="topbar-actions">
+          <h1 class="page-title" id="pageTitle">All Notes</h1>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="notes-grid" id="notesGrid">
+          <!-- Notes rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-illustration">
+            <i class="fa-solid fa-note-sticky"></i>
+          </div>
+          <h2 class="empty-title" id="emptyTitle">No notes yet</h2>
+          <p class="empty-text" id="emptyText">Tap the + button to create your first note.</p>
+          <button class="btn btn-primary" id="emptyAddBtn">
+            <i class="fa-solid fa-plus"></i> New Note
+          </button>
+        </div>
+      </div>
+
+      <!-- Floating Add Button -->
+      <button class="fab" id="addNoteBtn" aria-label="Add new note">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </main>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="bottom-nav-item active" data-filter="all">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>All</span>
+      </button>
+      <button class="bottom-nav-item" data-filter="pinned">
+        <i class="fa-solid fa-thumbtack"></i>
+        <span>Pinned</span>
+      </button>
+      <button class="bottom-nav-item" data-filter="favourites">
+        <i class="fa-solid fa-star"></i>
+        <span>Stars</span>
+      </button>
+      <button class="bottom-nav-item" data-filter="archive">
+        <i class="fa-solid fa-box-archive"></i>
+        <span>Archive</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Note Editor Modal -->
+  <div class="modal-overlay" id="editorModal" hidden>
+    <div class="modal editor-modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="editorTitle">New Note</h2>
+        <button class="modal-close" id="editorClose" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input
+          type="text"
+          id="noteTitle"
+          class="note-title-input"
+          placeholder="Note title..."
+          maxlength="120"
+        />
+        <textarea
+          id="noteContent"
+          class="note-content-input"
+          placeholder="Start writing..."
+          rows="8"
+        ></textarea>
+
+        <div class="editor-meta">
+          <div class="meta-row">
+            <label class="meta-label">Colour</label>
+            <div class="colour-picker" id="colourPicker">
+              <button class="colour-swatch active" data-colour="yellow" style="--swatch: var(--note-yellow)" aria-label="Yellow"></button>
+              <button class="colour-swatch" data-colour="mint" style="--swatch: var(--note-mint)" aria-label="Mint"></button>
+              <button class="colour-swatch" data-colour="sky" style="--swatch: var(--note-sky)" aria-label="Sky"></button>
+              <button class="colour-swatch" data-colour="lavender" style="--swatch: var(--note-lavender)" aria-label="Lavender"></button>
+              <button class="colour-swatch" data-colour="peach" style="--swatch: var(--note-peach)" aria-label="Peach"></button>
+              <button class="colour-swatch" data-colour="rose" style="--swatch: var(--note-rose)" aria-label="Rose"></button>
+            </div>
+          </div>
+
+          <div class="meta-row">
+            <label class="meta-label" for="noteTag">Tag</label>
+            <input
+              type="text"
+              id="noteTag"
+              class="tag-input"
+              placeholder="e.g. Work, Ideas..."
+              maxlength="24"
+              list="tagSuggestions"
+            />
+            <datalist id="tagSuggestions"></datalist>
+          </div>
+
+          <div class="meta-row toggles">
+            <label class="toggle-label">
+              <input type="checkbox" id="notePinned" />
+              <span class="toggle-ui"><i class="fa-solid fa-thumbtack"></i> Pin</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="noteFavourite" />
+              <span class="toggle-ui"><i class="fa-solid fa-star"></i> Favourite</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="editor-stats">
+          <span id="charCount">0 characters</span>
+          <span class="dot">·</span>
+          <span id="wordCount">0 words</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="editorCancel">Cancel</button>
+        <button class="btn btn-primary" id="editorSave">
+          <i class="fa-solid fa-check"></i> Save Note
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal" hidden>
+    <div class="modal confirm-modal">
+      <div class="confirm-icon">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <h2 class="confirm-title">Delete this note?</h2>
+      <p class="confirm-text">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="deleteCancel">Cancel</button>
+        <button class="btn btn-danger" id="deleteConfirm">
+          <i class="fa-solid fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focus Mode -->
+  <div class="focus-mode" id="focusMode" hidden>
+    <div class="focus-header">
+      <button class="focus-back" id="focusBack" aria-label="Exit focus mode">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back</span>
+      </button>
+      <div class="focus-stats">
+        <span id="focusWordCount">0 words</span>
+      </div>
+      <button class="focus-save" id="focusSave" aria-label="Save">
+        <i class="fa-solid fa-check"></i>
+        <span>Save</span>
+      </button>
+    </div>
+    <div class="focus-body">
+      <input
+        type="text"
+        id="focusTitle"
+        class="focus-title"
+        placeholder="Untitled"
+        maxlength="120"
+      />
+      <textarea
+        id="focusContent"
+        class="focus-content"
+        placeholder="Write freely..."
+      ></textarea>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden>
+    <span id="toastMessage"></span>
+  </div>
+
+  <footer class="app-footer">
+    Built with ♥ by Shalabh Suman
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
